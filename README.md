@@ -56,9 +56,27 @@ In this exercise you will:
 
 ```bash
 # 1) The exact ssh command you ran
+ssh -v KonstantinMoser@128.140.85.215
 # 2) A detailed, step-by-step explanation of what happened at each stage
 ```
-
+Step 1
+At first the SSH client establishes a TCP conection with Port 22. Once the server responds, the connectionis successfully established. The SSH client starts by displaying its SSH protocol version. 
+Step 2
+The SSH client checks whether local private/public key pairs exist in the .ssh direcory. In my case "type -1" is displayed at every file the client searches for wich means they do not exist. 
+Step 3
+The client and server exchange SSH protocol versions to confirm their compatibility. 
+Step 4
+Both sides send lists of cryptographic algorithms. This marks the beginning of the SSH handshake and encryption setup.
+Step 5
+Both sides agree on the cryptographic algorithm both support. 
+Step 6 - Server identification
+The server sends its public host key. The SSH client compares it to the saved entry.
+Step 9 - Establishing enrypted session
+Both sides now activate the negotiated encryption key. From this point all comunication is encrypted. 
+Step 10 - Authentication methods
+The server offers authentication via Public-Key and Passwords. The client attempts to authenticate using several possible private keys. In my case none of these files exist yet and it resolves to using password based encryption. 
+Step 11 - Shell allocation
+After sucessfull authentication the client request a shell session on the remote machine. In order to restrict what the SSH process is allowed to do on the client side "pledge: filesystem" is used. With "pledge: fork" the SSH process is now allowed to use the Unix fork() system call, which creates child processes. After that the remote server starts the login shell and displays the system banner. 
 ---
 
 ### Task 2: Ed25519 Key Pair
@@ -84,9 +102,11 @@ In this exercise you will:
 **Provide:**
 
 ```bash
-# 1) The ssh-keygen command you ran
-# 2) The file paths of the generated keys
+# 1) ssh-keygen -t ed25519 -C "KonstantinMoser@stud.thga.de"
+# 2) Private: ~/.ssh/id_ed25519
+Public: ~/.ssh/id_ed25519.pub
 # 3) Your written explanation (3–5 sentences) of the signature process
+During SSH authentication, the server sends a random challenge to the client. The client uses its private key to digitally sign this challenge and sends the signature back. The server varifies the signature using the stored public key in the authorized_keys file, proving that the client owns the matching private key witout revealing it. Ed25519 is based on ellipitc curves and uses smaller keys to achieve the same level of security as older algorithm like RSA making it quiker and potentially safer. 
 ```
 
 ---
